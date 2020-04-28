@@ -2,59 +2,79 @@ from tkinter import *
 from random import randrange as rnd, choice
 import time
 
-root = Tk()
-root.geometry('800x600')
 
-canv = Canvas(root, bg='white')
-canv.pack(fill=BOTH, expand=1)
+class Ball:
+    def __init__(self):
+        self.x = rnd(100, 700)
+        self.y = rnd(100, 500)
+        self.r = rnd(30, 50)
+        self.dx = rnd(-10, 10)
+        self.dy = rnd(-10, 10)
+        self.points = 0
+        self.ball_id = canv.create_oval(self.x - self.r, self.y - self.r, 
+                                        self.x + self.r, self.y + self.r,
+                                        fill=choice(colors), width=0)
 
-colors = ['red', 'orange', 'yellow', 'green', 'blue']
+    def move_ball(self):
+        canv.move(self.ball_id, self.dx, self.dy)
+        self.x += self.dx
+        self.y += self.dy
+        if (self.x + self.r) >= 800:
+            self.dx = -self.dx
+            self.dy = rnd(-3, 3)
+        elif (self.x - self.r) <= 0:
+            self.dx = -self.dx
+            self.dy = rnd(-3, 3)
+        elif (self.y + self.r) >= 600:
+            self.dx = rnd(-3, 3)
+            self.dy = -self.dy
+        elif (self.y - self.r) <= 5:
+            self.dx = rnd(-3, 3)
+            self.dy = -self.dy
 
-def move_ball():
-    global x, y, dx, dy
-    canv.move(ball_id, dx, dy)
-    x += dx
-    y += dy
-    if (x + r) >= 800:
-        dx = -dx
-        dy = rnd(-3, 3)
-    elif (x - r) <= 0:
-        dx = -dx
-        dy = rnd(-3, 3)
-    elif (y + r) >= 600:
-        dx = rnd(-3, 3)
-        dy = -dy
-    elif (y - r) <= 5:
-        dx = rnd(-3, 3)
-        dy = -dy
-    root.after(50, move_ball)
+    def points_counter(self, event):
+        self.l = ((self.x - event.x)**2 + (self.y - event.y)**2) ** 0.5
+        if self.l < self.r:
+            self.points += 1
+            print('Points:', self.points)
 
-def new_ball():
-    global x, y, r, ball_id, dx, dy
-    canv.delete(ALL)
-    x = rnd(100, 700)
-    y = rnd(100, 500)
-    r = rnd(30, 50)
-    dx = rnd(-10, 10)
-    dy = rnd(-10, 10)
+    def new_ball(self):
+        canv.delete(ALL)
+        self.x = rnd(100, 700)
+        self.y = rnd(100, 500)
+        self.r = rnd(30, 50)
+        self.dx = rnd(-10, 10)
+        self.dy = rnd(-10, 10)
+        self.ball_id = canv.create_oval(self.x - self.r, self.y - self.r, 
+                                        self.x + self.r, self.y + self.r,
+                                        fill=choice(colors), width=0)
+      
 
-    ball_id = canv.create_oval(x-r, y-r, x+r, y+r, fill=choice(colors), width=0)
- 
-    root.after(1000, new_ball)
+def tick():
+    global timer
+    ball.move_ball()
+    root.after(50, tick)
+    
 
-def click(event):
-    global pointsG
-    l = ((x - event.x)**2 + (y - event.y)**2) ** 0.5
-    if l < r:
-        pointsG += 1
-    print('Points:', pointsG)
+def main():
+    global root, canv, ball, colors, timer
 
+    timer = 0
+    root = Tk()
+    root.geometry('800x600')
+    canv = Canvas(root, bg='black')
+    canv.pack(fill=BOTH, expand=1)
+    colors = ['red', 'orange', 'yellow', 'green', 'blue']
 
-new_ball()
-move_ball()
-pointsG = 0
-canv.bind('<Button-1>', click)
-mainloop()
+    
+    ball = Ball()
+    tick()
+
+    canv.bind('<Button-1>', ball.points_counter)
+    mainloop()
+
+if __name__ == '__main__':
+    main()
 
 
 
