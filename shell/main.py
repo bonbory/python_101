@@ -32,45 +32,52 @@ class Ball:
             self.dx = rnd(-3, 3)
             self.dy = -self.dy
 
-    def points_counter(self, event):
-        self.l = ((self.x - event.x)**2 + (self.y - event.y)**2) ** 0.5
-        if self.l < self.r:
-            self.points += 1
-            print('Points:', self.points)
 
-    def new_ball(self):
-        canv.delete(ALL)
-        self.x = rnd(100, 700)
-        self.y = rnd(100, 500)
-        self.r = rnd(30, 50)
-        self.dx = rnd(-10, 10)
-        self.dy = rnd(-10, 10)
-        self.ball_id = canv.create_oval(self.x - self.r, self.y - self.r, 
-                                        self.x + self.r, self.y + self.r,
-                                        fill=choice(colors), width=0)
-      
+
+def points_counter(event):
+    global points
+    for ball in balls:
+        l = ((ball.x - event.x)**2 + (ball.y - event.y)**2) ** 0.5
+        if l < ball.r:
+            points += 1
+            print('Points:', points)
+
 
 def tick():
     global timer
-    ball.move_ball()
+
+    for ball in balls:
+        ball.move_ball()
+    timer += 1
     root.after(50, tick)
+    if timer == 120:
+        timer = 0
+        canv.delete(ALL)
+        make_balls(5)
     
 
-def main():
-    global root, canv, ball, colors, timer
+def make_balls(number_of_ball):
+    global balls
+    balls = [Ball() for i in range(number_of_ball)]
 
-    timer = 0
+
+
+def main():
+    global root, canv, balls, colors, points, timer
+
     root = Tk()
     root.geometry('800x600')
     canv = Canvas(root, bg='black')
     canv.pack(fill=BOTH, expand=1)
     colors = ['red', 'orange', 'yellow', 'green', 'blue']
+    points = 0
+    timer = 0
 
-    
-    ball = Ball()
+    make_balls(1)
     tick()
-
-    canv.bind('<Button-1>', ball.points_counter)
+    for ball in balls:
+       canv.bind('<Button-1>', points_counter)
+    
     mainloop()
 
 if __name__ == '__main__':
